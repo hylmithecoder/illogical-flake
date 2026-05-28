@@ -31,6 +31,7 @@ let
     ps.wheel
     ps."pyproject-hooks"
     ps.opencv4
+    ps.tkinter
   ]);
 in
 {
@@ -61,6 +62,8 @@ in
       libqalculate
       ripgrep
       jq
+      fastfetch
+      networkmanagerapplet
 
       # GUI applications
       foot

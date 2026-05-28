@@ -87,73 +87,56 @@ in
       "chrome-flags.conf".source = "${dotfilesSource}/dots/.config/chrome-flags.conf";
       "code-flags.conf".source = "${dotfilesSource}/dots/.config/code-flags.conf";
       "darklyrc".source = "${dotfilesSource}/dots/.config/darklyrc";
-      "dolphinrc".source = "${dotfilesSource}/dots/.config/dolphinrc";
+      # "dolphinrc" handled in activation script to be mutable
       "foot".source = "${dotfilesSource}/dots/.config/foot";
       "fuzzel".source = "${dotfilesSource}/dots/.config/fuzzel";
       
-      # Hyprland Config
-      # Use text/readFile to put the file in the HM generation directory
-      # This ensures relative sources (like hyprland/env.conf) resolve to OUR patched files
-      "hypr/hyprland.conf".text = (builtins.readFile "${dotfilesSource}/dots/.config/hypr/hyprland.conf") + ''
-        
-        # Load declarative plugins from the flake
-        source = plugins.conf
-      '';
-      
-      # Generate plugins.conf with paths to installed plugins
-      "hypr/plugins.conf".text = lib.concatMapStrings (plugin: ''
-        plugin = ${plugin}/lib/lib${plugin.pname}.so
-      '') cfg.hyprland.plugins;
-      
+      # Hyprland Config - Lua-based main entry
+      "hypr/hyprland.lua".source = "${dotfilesSource}/dots/.config/hypr/hyprland.lua";
+
       # Hyprland Environment - Patched to fix XDG_DATA_DIRS and define qsConfig EARLY
-      "hypr/hyprland/env.conf".text = ''
-        # --- Injected Environment by Illogical Impulse Flake ---
-        env = PATH,${config.home.homeDirectory}/.nix-profile/bin:/etc/profiles/per-user/${config.home.username}/bin:$PATH
-        env = XDG_DATA_DIRS,${config.home.homeDirectory}/.nix-profile/share:${config.home.homeDirectory}/.local/share:/etc/profiles/per-user/${config.home.username}/share:/run/current-system/sw/share:${config.home.homeDirectory}/.local/share/flatpak/exports/share:/var/lib/flatpak/exports/share:/usr/local/share:/usr/share:$XDG_DATA_DIRS
-        env = QT_PLUGIN_PATH,${config.home.homeDirectory}/.nix-profile/lib/qt-6/plugins:${config.home.homeDirectory}/.nix-profile/lib/plugins
-        env = QML2_IMPORT_PATH,${config.home.homeDirectory}/.nix-profile/lib/qt-6/qml
-        env = QT_WAYLAND_DISABLE_WINDOWDECORATION,1
-        env = QT_QPA_PLATFORMTHEME,gtk3
-        
-        # Define qsConfig for exec-once commands
-        $qsConfig = ${config.home.homeDirectory}/.config/quickshell/ii
-        env = qsConfig,${config.home.homeDirectory}/.config/quickshell/ii
+      "hypr/hyprland/env.lua".text = ''
+        -- --- Injected Environment by Illogical Impulse Flake ---
+        hl.env("PATH", "${config.home.homeDirectory}/.nix-profile/bin:/etc/profiles/per-user/${config.home.username}/bin:" .. (os.getenv("PATH") or ""))
+        hl.env("XDG_DATA_DIRS", "${config.home.homeDirectory}/.nix-profile/share:${config.home.homeDirectory}/.local/share:/etc/profiles/per-user/${config.home.username}/share:/run/current-system/sw/share:${config.home.homeDirectory}/.local/share/flatpak/exports/share:/var/lib/flatpak/exports/share:/usr/local/share:/usr/share:" .. (os.getenv("XDG_DATA_DIRS") or ""))
+        hl.env("QT_PLUGIN_PATH", "${config.home.homeDirectory}/.nix-profile/lib/qt-6/plugins:${config.home.homeDirectory}/.nix-profile/lib/plugins")
+        hl.env("QML2_IMPORT_PATH", "${config.home.homeDirectory}/.nix-profile/lib/qt-6/qml")
+        hl.env("QT_WAYLAND_DISABLE_WINDOWDECORATION", "1")
+        hl.env("QT_QPA_PLATFORMTHEME", "gtk3")
+        hl.env("qsConfig", "${config.home.homeDirectory}/.config/quickshell/ii")
 
-        # --- Original Environment Content ---
-        env = ELECTRON_OZONE_PLATFORM_HINT,auto
-        env = QT_QPA_PLATFORM, wayland
-        env = XDG_MENU_PREFIX, plasma-
-        env = ILLOGICAL_IMPULSE_VIRTUAL_ENV, ~/.local/state/quickshell/.venv
-        env = TERMINAL,kitty -1
-      '';
+        -- --- Original Environment Content ---
+      '' + builtins.readFile "${dotfilesSource}/dots/.config/hypr/hyprland/env.lua";
 
-      # Symlink other hyprland files individually
-      "hypr/hyprland/colors.conf".source = "${dotfilesSource}/dots/.config/hypr/hyprland/colors.conf";
-      "hypr/hyprland/execs.conf".source = "${dotfilesSource}/dots/.config/hypr/hyprland/execs.conf";
-      # Patch general.conf to remove obsolete hyprexpo options (enable_gesture, gesture_positive)
-      # These were removed from the hyprexpo plugin API and cause "Invalid value false for finger count" error
-      "hypr/hyprland/general.conf".text = builtins.replaceStrings
-        [ "enable_gesture = false" "gesture_positive = false" ]
-        [ "# enable_gesture = false  # Removed: obsolete hyprexpo option" "# gesture_positive = false  # Removed: obsolete hyprexpo option" ]
-        (builtins.readFile "${dotfilesSource}/dots/.config/hypr/hyprland/general.conf");
-      "hypr/hyprland/keybinds.conf".source = "${dotfilesSource}/dots/.config/hypr/hyprland/keybinds.conf";
-      "hypr/hyprland/rules.conf".source = "${dotfilesSource}/dots/.config/hypr/hyprland/rules.conf";
+      # Symlink other hyprland LUA files and directories
+      "hypr/hyprland/colors.lua".source = "${dotfilesSource}/dots/.config/hypr/hyprland/colors.lua";
+      "hypr/hyprland/execs.lua".source = "${dotfilesSource}/dots/.config/hypr/hyprland/execs.lua";
+      "hypr/hyprland/general.lua".source = "${dotfilesSource}/dots/.config/hypr/hyprland/general.lua";
+      "hypr/hyprland/keybinds.lua".source = "${dotfilesSource}/dots/.config/hypr/hyprland/keybinds.lua";
+      "hypr/hyprland/rules.lua".source = "${dotfilesSource}/dots/.config/hypr/hyprland/rules.lua";
+      "hypr/hyprland/variables.lua".source = "${dotfilesSource}/dots/.config/hypr/hyprland/variables.lua";
       "hypr/hyprland/scripts".source = "${dotfilesSource}/dots/.config/hypr/hyprland/scripts";
+      "hypr/hyprland/lib".source = "${dotfilesSource}/dots/.config/hypr/hyprland/lib";
+      "hypr/hyprland/services".source = "${dotfilesSource}/dots/.config/hypr/hyprland/services";
+      "hypr/hyprland/shellOverrides".source = "${dotfilesSource}/dots/.config/hypr/hyprland/shellOverrides";
 
-      # Hyprland Custom Env - Reverted to direct source
-      "hypr/custom/env.conf".source = "${dotfilesSource}/dots/.config/hypr/custom/env.conf";
+      # Hyprland Custom Env
+      "hypr/custom/env.lua".source = "${dotfilesSource}/dots/.config/hypr/custom/env.lua";
 
       # Symlink custom siblings
-      "hypr/custom/execs.conf".source = "${dotfilesSource}/dots/.config/hypr/custom/execs.conf";
-      "hypr/custom/general.conf".source = "${dotfilesSource}/dots/.config/hypr/custom/general.conf";
-      "hypr/custom/keybinds.conf".source = "${dotfilesSource}/dots/.config/hypr/custom/keybinds.conf";
-      "hypr/custom/rules.conf".source = "${dotfilesSource}/dots/.config/hypr/custom/rules.conf";
+      "hypr/custom/execs.lua".source = "${dotfilesSource}/dots/.config/hypr/custom/execs.lua";
+      "hypr/custom/general.lua".source = "${dotfilesSource}/dots/.config/hypr/custom/general.lua";
+      "hypr/custom/keybinds.lua".text = (builtins.readFile "${dotfilesSource}/dots/.config/hypr/custom/keybinds.lua") + ''
+        -- Custom binds
+        hl.bind("SUPER + C", hl.dsp.exec_cmd("antigravity"))
+        hl.bind("SUPER + Return", hl.dsp.exec_cmd("kitty"))
+      '';
+      "hypr/custom/rules.lua".source = "${dotfilesSource}/dots/.config/hypr/custom/rules.lua";
+      "hypr/custom/variables.lua".source = "${dotfilesSource}/dots/.config/hypr/custom/variables.lua";
       "hypr/custom/scripts".source = "${dotfilesSource}/dots/.config/hypr/custom/scripts";
       "hypr/hyprlock".source = "${dotfilesSource}/dots/.config/hypr/hyprlock";
       "hypr/hypridle.conf".source = "${dotfilesSource}/dots/.config/hypr/hypridle.conf";
       "hypr/hyprlock.conf".source = "${dotfilesSource}/dots/.config/hypr/hyprlock.conf";
-      "hypr/monitors.conf".source = "${dotfilesSource}/dots/.config/hypr/monitors.conf";
-      "hypr/workspaces.conf".source = "${dotfilesSource}/dots/.config/hypr/workspaces.conf";
 
       # kdeglobals handled in activation script
       # "kdeglobals".source = "${dotfilesSource}/dots/.config/kdeglobals";
@@ -240,20 +223,29 @@ in
       fi
       
       # Handle kdeglobals (Mutable copy)
-      # If it's a symlink (likely from previous HM generation), remove it first
       if [ -L "$targetPath/kdeglobals" ]; then
           $DRY_RUN_CMD rm "$targetPath/kdeglobals"
       fi
-
-      # We copy it if it doesn't exist (or was just removed), to allow scripts to modify it
       if [ ! -f "$targetPath/kdeglobals" ]; then
          if [ -f "$configPath/kdeglobals" ]; then
              $DRY_RUN_CMD cp "$configPath/kdeglobals" "$targetPath/kdeglobals"
              $DRY_RUN_CMD chmod u+w "$targetPath/kdeglobals"
          fi
       else
-         # Ensure it's writable even if it exists
          $DRY_RUN_CMD chmod u+w "$targetPath/kdeglobals"
+      fi
+
+      # Handle dolphinrc (Mutable copy)
+      if [ -L "$targetPath/dolphinrc" ]; then
+          $DRY_RUN_CMD rm "$targetPath/dolphinrc"
+      fi
+      if [ ! -f "$targetPath/dolphinrc" ]; then
+         if [ -f "$configPath/dolphinrc" ]; then
+             $DRY_RUN_CMD cp "$configPath/dolphinrc" "$targetPath/dolphinrc"
+             $DRY_RUN_CMD chmod u+w "$targetPath/dolphinrc"
+         fi
+      else
+         $DRY_RUN_CMD chmod u+w "$targetPath/dolphinrc"
       fi
 
       # Handle konsole directory (Mutable directory with managed files)
