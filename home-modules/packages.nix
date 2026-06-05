@@ -31,6 +31,7 @@ let
     ps.wheel
     ps."pyproject-hooks"
     ps.opencv4
+    ps.tkinter
   ]);
 in
 {
@@ -61,6 +62,8 @@ in
       libqalculate
       ripgrep
       jq
+      fastfetch
+      networkmanagerapplet
 
       # GUI applications
       foot
@@ -86,6 +89,8 @@ in
       hyprpicker
       imagemagick
       ffmpeg
+      songrec  # Music recognition
+      pulseaudio  # Provides pactl and parec for audio recording
       gnome-settings-daemon  # Provides gsettings
       libnotify  # Provides notify-send
       easyeffects
@@ -114,6 +119,9 @@ in
       gnome-icon-theme  # Additional GNOME icon coverage
       kdePackages.breeze-icons  # KDE Breeze icons (required by Papirus inheritance)
 
+      # Cloudflare-warp
+      cloudflare-warp
+      
       # Python with required packages for wallpaper analysis
       pythonEnv
       eza  # Modern ls replacement
@@ -122,6 +130,8 @@ in
       gnome-keyring  # Keyring support
       kdePackages.bluedevil  # Bluetooth management (for kcm_bluetooth)
       kdePackages.plasma-nm  # Network management (for kcm_networkmanagement)
+      kdePackages.plasma-workspace # Provides plasma-apply-colorscheme
+      kdePackages.kde-cli-tools # Provides various KDE CLI utilities
       kdePackages.polkit-kde-agent-1  # Polkit authentication agent
       kdePackages.kdialog  # Dialog prompts
       kdePackages.kirigami
