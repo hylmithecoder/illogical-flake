@@ -66,7 +66,6 @@ in
       networkmanagerapplet
 
       # GUI applications
-      foot
       fuzzel
       matugen
       mpv
