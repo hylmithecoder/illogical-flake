@@ -88,7 +88,7 @@ in
       "code-flags.conf".source = "${dotfilesSource}/dots/.config/code-flags.conf";
       "darklyrc".source = "${dotfilesSource}/dots/.config/darklyrc";
       # "dolphinrc" handled in activation script to be mutable
-      "foot".source = "${dotfilesSource}/dots/.config/foot";
+      # "foot".source = "${dotfilesSource}/dots/.config/foot";
       "fuzzel".source = "${dotfilesSource}/dots/.config/fuzzel";
       
       # Hyprland Config - Lua-based main entry
@@ -126,11 +126,7 @@ in
       # Symlink custom siblings
       "hypr/custom/execs.lua".source = "${dotfilesSource}/dots/.config/hypr/custom/execs.lua";
       "hypr/custom/general.lua".source = "${dotfilesSource}/dots/.config/hypr/custom/general.lua";
-      "hypr/custom/keybinds.lua".text = (builtins.readFile "${dotfilesSource}/dots/.config/hypr/custom/keybinds.lua") + ''
-        -- Custom binds
-        hl.bind("SUPER + C", hl.dsp.exec_cmd("antigravity"))
-        hl.bind("SUPER + Return", hl.dsp.exec_cmd("kitty"))
-      '';
+      "hypr/custom/keybinds.lua".source = "${dotfilesSource}/dots/.config/hypr/custom/keybinds.lua";
       "hypr/custom/rules.lua".source = "${dotfilesSource}/dots/.config/hypr/custom/rules.lua";
       "hypr/custom/variables.lua".source = "${dotfilesSource}/dots/.config/hypr/custom/variables.lua";
       "hypr/custom/scripts".source = "${dotfilesSource}/dots/.config/hypr/custom/scripts";
